@@ -1,0 +1,1 @@
+By ${spring-boot.formatted-version}

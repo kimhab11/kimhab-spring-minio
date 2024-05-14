@@ -1,0 +1,17 @@
+server:
+  port: 8080
+minio:
+#  url: https://play.min.io
+#  accessKey: minioadmin
+#  secretKey: minioadmin
+  bucket: kimhab-test
+  url: http://127.0.0.1:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+
+# size limit
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
