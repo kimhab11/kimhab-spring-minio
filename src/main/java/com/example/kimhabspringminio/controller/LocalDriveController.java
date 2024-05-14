@@ -49,7 +49,7 @@ public class LocalDriveController {
     }
 
     @GetMapping("file/download")
-    public ResponseEntity<?> getFile(@RequestParam String fileName){
+    public ResponseEntity<?> getFile(@RequestParam String fileName) {
 
         var file = localDriveService.download(fileName);
 
@@ -68,13 +68,18 @@ public class LocalDriveController {
         }
     }
 
-
     @GetMapping("file/list-all")
-    public ResponseEntity<?> listAllFile(){
-        var files =  localDriveService.listAllFiles();
+    public ResponseEntity<?> listAllFile() throws IOException {
+        var files = localDriveService.listAllFiles();
 
-        objectMap.put("size " , files.size());
+        objectMap.put("size ", files.size());
         objectMap.put("data ", files);
         return ResponseEntity.ok(objectMap);
+    }
+
+    @DeleteMapping("/file")
+    public ResponseEntity<?> deleteFile(@RequestParam String fileName){
+        localDriveService.deleteFile(fileName);
+        return ResponseEntity.ok("File deleted");
     }
 }

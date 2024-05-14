@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -58,7 +57,17 @@ public class LocalDriveService {
         } else throw new RuntimeException("file not found");
     }
 
-    public List<LocalFileRes> listAllFiles() {
+    public void deleteFile(String fileName) {
+        // read file
+        File file = new File(FILE_DIRECTORY + File.separator + fileName);
+        // check file
+        if (file.exists()) {
+            file.delete();
+            log.info("deleted file, {} ", fileName);
+        } else throw new RuntimeException("file not found");
+    }
+
+    public List<LocalFileRes> listAllFiles() throws IOException {
 
         List<LocalFileRes> fileResList = new ArrayList<>();
 
@@ -69,17 +78,21 @@ public class LocalDriveService {
         if (files.length >= 1) {
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            //  DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
 
             for (File file : files) {
                 LocalFileRes localFileRes = new LocalFileRes();
                 localFileRes.setFileName(file.getName());
                 localFileRes.setPath(file.getPath());
-            //    localFileRes.setSize(Long.parseLong(decimalFormat.format(file.length() / 1024.0))); // Convert bytes to kilobytes
+                //    localFileRes.setSize(Long.parseLong(decimalFormat.format(file.length() / 1024.0))); // Convert bytes to kilobytes
                 localFileRes.setSize(file.length());
                 localFileRes.setCreatedAt(dateFormat.format(file.lastModified()));
                 fileResList.add(localFileRes);
+
+                //   System.out.println(file.getAbsolutePath());
+                //   System.out.println(file.getCanonicalPath());
+                //   System.out.println(file.toPath());
             }
 
             log.info("files total: {}", Arrays.stream(files).count());
@@ -87,11 +100,6 @@ public class LocalDriveService {
         }
         log.info("file: {}", fileResList);
         return fileResList;
-    }
-
-    public static void main(String[] args) {
-        LocalDriveService f = new LocalDriveService();
-        f.listAllFiles();
     }
 
     protected String generateFilename() {
