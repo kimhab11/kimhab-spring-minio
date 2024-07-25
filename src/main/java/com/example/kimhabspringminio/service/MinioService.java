@@ -31,7 +31,6 @@ public class MinioService {
 
     String getCurrentDateTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-      //  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-dd-MM HH:mm:ss");
         String time = LocalDateTime.now().format(formatter);
         log.info("prefix: {}", time);
         return time;

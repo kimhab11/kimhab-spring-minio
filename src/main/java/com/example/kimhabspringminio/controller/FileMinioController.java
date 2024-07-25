@@ -25,13 +25,22 @@ import java.util.*;
 @Slf4j
 @Setter
 @Getter
-public class FileController {
+public class FileMinioController {
     @Value("${minio.bucket}")
     private String bucket;
     @Autowired
     private MinioService minioService;
 
     private Map<String, Object> stringObjectMap = new HashMap<>();
+    private final Map<String, String> mimeTypeMap = new HashMap<>();
+    private String getContentTypeFromExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == fileName.length() - 1) {
+            return "application/octet-stream"; // Default MIME type if no extension is found
+        }
+        String extension = fileName.substring(dotIndex + 1).toLowerCase();
+        return mimeTypeMap.getOrDefault(extension, "application/octet-stream");
+    }
 
 
     @PostMapping("upload")
@@ -39,6 +48,7 @@ public class FileController {
         if (Arrays.stream(files).count() > 0) {
             for (MultipartFile file: files){
                 try {
+                    log.info("MultipartFile: {}", file);
                     minioService.uploadFile(bucket, file.getOriginalFilename(), file.getInputStream(), file.getSize(), file.getContentType());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -58,6 +68,27 @@ public class FileController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.setContentDispositionFormData("attachment", fileName);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("preview")
+   // @GetMapping("preview/{fileName:.+}")
+    public ResponseEntity<?> previewFile(@RequestParam(value = "fileName") String fileName) {
+        try {
+            InputStream fileStream = minioService.getFile(bucket, fileName.trim());
+            InputStreamResource resource = new InputStreamResource(fileStream);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"");
+            headers.add(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE); // dynamic content
             headers.setContentDispositionFormData("attachment", fileName);
 
             return ResponseEntity.ok()

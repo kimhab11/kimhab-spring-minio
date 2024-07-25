@@ -4,6 +4,7 @@ import com.example.kimhabspringminio.service.LocalDriveService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +68,35 @@ public class LocalDriveController {
         } else {
             // File not found, handle accordingly
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("file/preview")
+    public ResponseEntity<?> preview(@RequestParam String fileName) throws IOException {
+
+        var file = localDriveService.download(fileName);
+
+        if (file.exists()) {
+            // FileSystemResource fileResource = new FileSystemResource(file);
+            Resource resource = new org.springframework.core.io.PathResource(file.getPath());
+
+            var path = Path.of(file.getPath());
+
+            // set header
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("attachment", fileName);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"");
+            headers.add(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path));
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(file.length())
+                    .body(resource);
+                  //  .body(fileResource);
+        } else {
+            // File not found, handle accordingly
+            log.warn("File not found");
+            return ResponseEntity.ok("not found");
         }
     }
 

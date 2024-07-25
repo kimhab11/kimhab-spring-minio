@@ -16,29 +16,22 @@ import java.util.*;
 @Slf4j
 public class LocalDriveService {
 
-    static final String FILE_DIRECTORY = "D:\\My Test On Create Local Drive";
+    private final String FILE_DIRECTORY = "src/main/resources/static/uploads/";
 
     public void createFile(byte[] content, String fileName, String sharedDrivePath) throws IOException {
-        // Create a Path object for the shared drive
-        Path sharedDrive = Paths.get(sharedDrivePath);
 
-
-        // Resolve the folder path on the shared drive
-        Path folderPath = sharedDrive.resolve("My Test On Create Local Drive");
-
-        // Create the folder if it doesn't exist
-        if (!Files.exists(folderPath)) {
-            Files.createDirectories(folderPath);
+        // Create the upload directory if it doesn't exist
+        File uploadDir = new File(FILE_DIRECTORY);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
         }
-        log.info("folderPath: {}", folderPath);
 
+        // generate filename
         String finalName = generateFilename() + fileName;
         log.info("finalName file: {}", finalName);
 
-        // Resolve the file path within the folder
-        Path filePath = folderPath.resolve(finalName);
-
-        // Write the file to the shared drive
+        // Save the file to the specified directory
+        Path filePath = Paths.get(FILE_DIRECTORY + finalName);
         Files.write(filePath, content);
         log.info("File written to drive: {}", filePath);
 
@@ -111,6 +104,14 @@ public class LocalDriveService {
         log.info("uuid generate: {}", uuid);
 
         return formattedDate + "-" + uuid + " ";
+    }
+
+    protected static String getFileExtension(String filePath) {
+        int lastIndex = filePath.lastIndexOf('.');
+        if (lastIndex == -1 || lastIndex == filePath.length() - 1) {
+            return ""; // No extension found
+        }
+        return filePath.substring(lastIndex + 1);
     }
 
 }
