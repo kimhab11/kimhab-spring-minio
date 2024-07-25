@@ -37,7 +37,7 @@ public class LocalDriveController {
                     // original name of file
                     String originalFilename = file.getOriginalFilename();
                     // save to drive D
-                    localDriveService.createFile(content, originalFilename, "D:\\");
+                    localDriveService.createFile(content, originalFilename);
                     log.info("File uploaded successfully");
 
                     return ResponseEntity.status(HttpStatus.CREATED).body("File uploaded successfully");
@@ -84,7 +84,6 @@ public class LocalDriveController {
 
             // set header
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentDispositionFormData("attachment", fileName);
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"");
             headers.add(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path));
 

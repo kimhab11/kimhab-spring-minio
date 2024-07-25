@@ -10,6 +10,8 @@ public class LocalFileRes {
     private String path;
     @JsonFormat(pattern = "dd-MM-yy HH:mm:ss")
     private String createdAt;
+    private String extension;
+    private String url;
     private long size;
 
     @JsonProperty("size")
